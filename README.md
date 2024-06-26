@@ -1,5 +1,7 @@
 Create a **Shadow Threshold Map** by interpolating SDF (Signed Distance Field).
 
+![top.png](.images/top.png)
+
 The algorithm is based on the following link:  
 🔗[SDF Based Transition Blending for Shadow Threshold Map - ながむしメモ](https://nagakagachi.hatenablog.com/entry/2024/03/02/140704)  
 
@@ -39,7 +41,6 @@ python run.py -i 'sample/sample2' -o 'output2' -n 'face_map' -b 16 -r true -t tr
 ### `--bitdepth`
 16-bit images have smoother shadow boundaries than 8-bit images. However, be aware that the file size and load will be higher.
 
-
 ### `--reverse`
 Reverses the gradient direction.
 
@@ -54,5 +55,5 @@ Saves the intermediate images created during processing in `outputdir\temp`. Thi
 ## Reference Links
 - [SDF Based Transition Blending for Shadow Threshold Map - ながむしメモ](https://nagakagachi.hatenablog.com/entry/2024/03/02/140704)
 - [UE5 SDF Face Shadowマッピングでアニメ顔用の影を作ろう - Let's Enjoy Unreal Engine](https://unrealengine.hatenablog.com/entry/2024/02/28/222220)
-- [Get *PERFECT* Anime Face Shadows (Easier Way) in Blender - YouTube](https://www.youtube.com/watch?v=x-K6bCAl6Qs)
+- [Get \*PERFECT\* Anime Face Shadows (Easier Way) in Blender - YouTube](https://www.youtube.com/watch?v=x-K6bCAl6Qs)
 - [GDC Vault - 3D Toon Rendering in 'Hi-Fi RUSH'](https://gdcvault.com/play/1034330/3D-Toon-Rendering-in-Hi)
