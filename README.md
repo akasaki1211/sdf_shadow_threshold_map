@@ -12,6 +12,7 @@ The algorithm is based on the following link:
 > - opencv-python 4.10.0.84
 
 ## Getting Started
+If you use the exe from [Releases](https://github.com/akasaki1211/sdf_shadow_threshold_map/releases), you do not need this step. For more details, see [here](#using-exe).
 ```
 python -m venv venv
 venv\scripts\activate
@@ -27,22 +28,26 @@ python run.py -i 'sample/sample1'
 **with Options :**  
 You can also run it with some additional options.  
 ```powershell
-python run.py -i 'sample/sample2' -o 'output2' -n 'face_map' -b 16 -r true -t true
+python run.py -i 'sample/sample2' -o 'output2' -n 'face_map' -b 16 -r -t
 ```
 
 ## Options
-- `-i`, `--inputdir` (str) : Input directory path. Default is 'input'.
-- `-o`, `--outputdir` (str) : Output directory path. Default is 'output'.
-- `-n`, `--outputname` (str) : Output file name. Default is 'shadow_threshold_map'.
-- `-b`, `--bitdepth` (int) : Output PNG bit depth (8 or 16). Default is 8.
-- `-r`, `--reverse` (bool) : Reverse the gradient direction. Default is false.
-- `-t`, `--savetemp` (bool) : Save the image during processing. Default is false.
+- `-i`, `--inputdir` : Specify the input directory path where images are stored. This is a required option.
+- `-o`, `--outputdir` : Specify the output directory path where images will be saved. Default is 'output'.
+- `-n`, `--outputname` : Specify the base name for the output PNG file. Default is 'shadow_threshold_map'.
+- `-b`, `--bitdepth` : Set the bit depth for output PNG files. Valid options are 8 or 16. Default is 8.
+- `-r`, `--reverse` : Enable to reverse the gradient direction.
+- `-t`, `--savetemp` : Enable to save intermediate images during the processing.
 
 ### `--bitdepth`
 16-bit images have smoother shadow boundaries than 8-bit images. However, be aware that the file size and load will be higher.
 
+![bitdepth.png](.images/bitdepth.png)
+
 ### `--reverse`
 Reverses the gradient direction.
+
+![reverse.png](.images/reverse.png)
 
 ### `--savetemp`
 Saves the intermediate images created during processing in `outputdir\temp`. This is for debugging purposes.  
@@ -50,7 +55,20 @@ Saves the intermediate images created during processing in `outputdir\temp`. Thi
 - step 1 : SDF image obtained from the input image
 - step 2 : Mask created from the pair of input images
 - step 3 : Gradient obtained from the pair of SDF images
-- step 4 : LERP with the gradient and masked image
+- step 4 : Lerp with the gradient and masked image
+
+![savetemp.png](.images/savetemp.png)
+
+## Using exe
+If you do not have Python installed, use the exe. Download from [Releases](https://github.com/akasaki1211/sdf_shadow_threshold_map/releases).
+
+```powershell
+ShadowThresholdMap.exe -i 'sample/sample1'
+```
+
+```powershell
+ShadowThresholdMap.exe -i 'sample/sample2' -o 'output2' -n 'face_map' -b 16 -r -t
+```
 
 ## Reference Links
 - [SDF Based Transition Blending for Shadow Threshold Map - ながむしメモ](https://nagakagachi.hatenablog.com/entry/2024/03/02/140704)
