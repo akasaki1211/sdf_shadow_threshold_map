@@ -32,7 +32,7 @@ python run.py -i 'sample/sample2' -o 'output2' -n 'face_map' -b 16 -r -t
 ```
 
 ## Options
-- `-i`, `--inputdir` : Specify the input directory path where images are stored. This is a required option.
+- `-i`, `--inputdir` : Specify the input directory path where contains only images. This is a required option.
 - `-o`, `--outputdir` : Specify the output directory path where images will be saved. Default is 'output'.
 - `-n`, `--outputname` : Specify the base name for the output PNG file. Default is 'shadow_threshold_map'.
 - `-b`, `--bitdepth` : Set the bit depth for output PNG files. Valid options are 8 or 16. Default is 8.
