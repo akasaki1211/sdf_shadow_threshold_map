@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Literal, Optional
 import numpy as np
 import cv2
 import logging
@@ -27,24 +27,46 @@ def load_image_with_grayscale(image_path:str, binarization:bool=False) -> np.nda
     
     return gray
 
-def save_image(img_normalized:np.ndarray, output_path:str, bit_depth:int=8) -> None:
+def save_image(
+        img_normalized:np.ndarray, 
+        output_path:str, 
+        bit_depth:Literal[8, 16]=8, 
+        color_mode:Literal['gray', 'rgb', 'rgba']='gray',
+        alpha_normalized:Optional[np.ndarray]=None
+    ) -> None:
+
     """
     Args:
         img_normalized (np.ndarray): Image normalized to 0.0 ~ 1.0
         output_path (str): Output PNG Path
         bit_depth (int, optional): Output PNG bit depth (8 or 16). Defaults to 8.
+        color_mode (Literal['gray', 'rgb', 'rgba'], optional): The color mode of the output image ('gray', 'rgb', and 'rgba'). Defaults to 'gray'.
+        alpha_normalized (np.ndarray, optional): Alpha image normalized to 0.0 ~ 1.0. Used only when color_mode is set to 'rgba'.
     """
     
     if not bit_depth in [8, 16]:
         bit_depth = 8
 
+    if color_mode == 'rgba' and alpha_normalized is None:
+        color_mode == 'rgb'
+    
     scale_factor = 255 if bit_depth == 8 else 65535
     dtype = np.uint8 if bit_depth == 8 else np.uint16
 
     # convert dtype
     img_dtype_conversion = (img_normalized * scale_factor).astype(dtype)
+    
+    # color mode
+    if color_mode == 'gray':
+        img = img_dtype_conversion
+    elif color_mode == 'rgb':
+        img = cv2.merge([img_dtype_conversion, img_dtype_conversion, img_dtype_conversion])
+    else:
+        alpha_dtype_conversion = (alpha_normalized * scale_factor).astype(dtype)
+        img = cv2.merge([img_dtype_conversion, img_dtype_conversion, img_dtype_conversion, alpha_dtype_conversion])
 
-    cv2.imwrite(output_path, img_dtype_conversion)
+    # save
+    cv2.imwrite(output_path, img)
 
 def img_lerp(start:float, end:float, factor:np.ndarray) -> np.ndarray:
     return start + (end - start) * factor
@@ -89,7 +111,8 @@ def create_gradient_from_sdf(sdf1_normalized:np.ndarray, sdf2_normalized:np.ndar
 def generate_shadow_threshold_map(
         image_paths:List[str], 
         output_path:str,
-        bit_depth:int=8,
+        bit_depth:Literal[8, 16]=8, 
+        color_mode:Literal['gray', 'rgb', 'rgba']='gray',
         reverse:bool=False, 
         save_temp:bool=False
     ) -> None:
@@ -117,6 +140,7 @@ def generate_shadow_threshold_map(
             save_image(sdf, temp_path, bit_depth=bit_depth)
 
     gradient_maps = []
+    mask_maps = []
     
     for i in range(gradient_count):
         img1, img2 = grayscale_images[i], grayscale_images[i+1]
@@ -126,12 +150,11 @@ def generate_shadow_threshold_map(
         if reverse:
             s = 1 - s
             e = 1 - e
-
-        #print(image_paths[i], image_paths[i+1], s, e)
         logging.info('Processing images: {}, {} (step: {:.5f} - {:.5f})'.format(image_paths[i], image_paths[i+1], s, e))
 
         # generate mask
         mask = get_image_intersection(img1, img2)
+        mask_maps.append(mask)
 
         # generate gradient
         gradient = create_gradient_from_sdf(sdf1, sdf2)
@@ -152,6 +175,16 @@ def generate_shadow_threshold_map(
 
     # result
     shadow_threshold_map = np.sum(gradient_maps, axis=0)
-
+    
+    merged_mask = None
+    if color_mode == 'rgba':
+        merged_mask = np.sum(mask_maps, axis=0)
+    
     # save
-    save_image(shadow_threshold_map, output_path, bit_depth=bit_depth)
+    save_image(
+        shadow_threshold_map, 
+        output_path, 
+        bit_depth=bit_depth, 
+        color_mode=color_mode, 
+        alpha_normalized=merged_mask
+    )
