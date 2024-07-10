@@ -6,7 +6,7 @@ The algorithm is based on the following link:
 🔗[SDF Based Transition Blending for Shadow Threshold Map - ながむしメモ](https://nagakagachi.hatenablog.com/entry/2024/03/02/140704)  
 
 > **Tested with**
-> - Windows 10
+> - Windows 11
 > - Python 3.10.9
 > - numpy 2.0.0
 > - opencv-python 4.10.0.84
