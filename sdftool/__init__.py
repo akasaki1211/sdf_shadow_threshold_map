@@ -71,7 +71,7 @@ def save_image(
 def img_lerp(start:float, end:float, factor:np.ndarray) -> np.ndarray:
     return start + (end - start) * factor
 
-def get_image_intersection(img1:np.ndarray, img2:np.ndarray) -> np.ndarray:
+def get_image_difference(img1:np.ndarray, img2:np.ndarray) -> np.ndarray:
     img1_norm = cv2.normalize(img1, None, 0, 1.0, cv2.NORM_MINMAX)
     img2_norm = cv2.normalize(img2, None, 0, 1.0, cv2.NORM_MINMAX)
     return np.abs(img2_norm.astype(np.float64) - img1_norm.astype(np.float64))
@@ -150,10 +150,11 @@ def generate_shadow_threshold_map(
         if reverse:
             s = 1 - s
             e = 1 - e
+        
         logging.info('Processing images: {}, {} (step: {:.5f} - {:.5f})'.format(image_paths[i], image_paths[i+1], s, e))
 
         # generate mask
-        mask = get_image_intersection(img1, img2)
+        mask = get_image_difference(img1, img2)
         mask_maps.append(mask)
 
         # generate gradient
