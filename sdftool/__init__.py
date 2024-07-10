@@ -114,7 +114,10 @@ def generate_shadow_threshold_map(
         bit_depth:Literal[8, 16]=8, 
         color_mode:Literal['gray', 'rgb', 'rgba']='gray',
         reverse:bool=False, 
-        save_temp:bool=False
+        save_temp:bool=False,
+        filter_mode:Literal['none', 'gaussian', 'bilateral']='none',
+        gaussian_kernel:int=3,
+        bilateral_d:int=3
     ) -> None:
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -175,6 +178,12 @@ def generate_shadow_threshold_map(
 
     # result
     shadow_threshold_map = np.sum(gradient_maps, axis=0)
+
+    # filter
+    if filter_mode == 'gaussian':
+        shadow_threshold_map = cv2.GaussianBlur(shadow_threshold_map, (gaussian_kernel, gaussian_kernel), 0)
+    elif filter_mode == 'bilateral':
+        shadow_threshold_map = cv2.bilateralFilter(shadow_threshold_map.astype(np.float32), bilateral_d, 75, 75)
     
     merged_mask = None
     if color_mode == 'rgba':

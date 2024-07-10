@@ -12,6 +12,9 @@ def parse_arguments():
     parser.add_argument("-c", "--colormode", type=str, choices=['gray', 'rgb', 'rgba'], default='gray', help="Select the color mode for the output images. Options are 'gray', 'rgb', or 'rgba'. Default is 'gray'.")
     parser.add_argument("-r", "--reverse", action='store_true', help="Enable to reverse the gradient direction.")
     parser.add_argument("-t", "--savetemp", action='store_true', help="Enable to save intermediate images during the processing.")
+    parser.add_argument("-f", "--filtermode", type=str, choices=['none', 'gaussian', 'bilateral'], default='none', help="Select the filter mode for the image processing. Choices are 'none' (no filtering), 'gaussian' (apply Gaussian blur), or 'bilateral' (apply bilateral filter). Default is 'none'.")
+    parser.add_argument("-k", "--kernel_size", type=int, default=3, help="Kernel size for Gaussian Blur. It must be an odd number. Default is 3.")
+    parser.add_argument("-d", "--diameter", type=int, default=3, help="Diameter of the pixel neighborhood for Bilateral Filter. Default is 3.")
     return parser.parse_args()
 
 def get_file_list(directory):
@@ -42,7 +45,10 @@ def main():
         bit_depth=opt.bitdepth,
         color_mode=opt.colormode,
         reverse=opt.reverse, 
-        save_temp=opt.savetemp
+        save_temp=opt.savetemp,
+        filter_mode=opt.filtermode,
+        gaussian_kernel=opt.kernel_size,
+        bilateral_d=opt.diameter
     )
 
 if __name__ == "__main__":
