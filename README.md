@@ -39,6 +39,9 @@ python run.py -i 'sample/sample2' -o 'output2' -n 'face_map' -b 16 -c "rgb" -r -
 - `-c`, `--colormode`, Select the color mode for the output images. Options are 'gray', 'rgb', or 'rgba'. Default is 'gray'.
 - `-r`, `--reverse` : Enable to reverse the gradient direction.
 - `-t`, `--savetemp` : Enable to save intermediate images during the processing.
+- `-f`, `--filtermode` : Select the filter mode for the image processing. Choices are 'none' (no filtering), 'gaussian' (apply Gaussian blur), or 'bilateral' (apply bilateral filter). Default is 'none'.
+- `-k`, `--kernel_size` : Kernel size for Gaussian Blur. It must be an odd number. Default is 3.
+- `-d`, `--diameter` : Diameter of the pixel neighborhood for Bilateral Filter. Default is 3.
 
 ### `--bitdepth`
 16-bit images have smoother shadow boundaries than 8-bit images. However, be aware that the file size and load will be higher.
@@ -64,6 +67,16 @@ Saves the intermediate images created during processing in `outputdir\temp`. Thi
 - step 4 : Lerp with the gradient and masked image
 
 ![savetemp.png](.images/savetemp.png)
+
+### `--filtermode`
+A blur filter can be applied to the generated image. The available options are **Gaussian Blur** and **Bilateral Filter**. Gaussian should be used with `--kernel_size`, and bilateral with `--diameter`. The larger the value, the stronger the blur.  
+
+```powershell
+python run.py -i "sample/sample1" -f "gaussian" -k 5
+python run.py -i "sample/sample1" -f "bilateral" -d 5
+```
+
+![filtermode.png](.images/filtermode.png)
 
 ## Using exe
 If you do not have Python installed, use the exe. Download from [Releases](https://github.com/akasaki1211/sdf_shadow_threshold_map/releases).

@@ -4,6 +4,8 @@ import numpy as np
 import cv2
 import logging
 
+VERSION = '0.3.0'
+
 logging.basicConfig(
     level=logging.DEBUG, 
     format='[%(levelname)s] %(asctime)s | %(message)s'
@@ -20,10 +22,16 @@ def load_image_with_grayscale(image_path:str, binarization:bool=False) -> np.nda
     """
 
     img = cv2.imread(image_path)
+    if img is None:
+        logging.warning("Image '{}' could not be loaded.".format(image_path))
+        return
+    
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
     
     if binarization:
         _, gray = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY) 
+
+    logging.info("Image '{}' is loaded.".format(image_path))
     
     return gray
 
@@ -68,6 +76,8 @@ def save_image(
     # save
     cv2.imwrite(output_path, img)
 
+    logging.info("Saved to '{}'".format(output_path))
+
 def img_lerp(start:float, end:float, factor:np.ndarray) -> np.ndarray:
     return start + (end - start) * factor
 
@@ -84,7 +94,7 @@ def generate_sdf(img_binary:np.ndarray, distanceType=cv2.DIST_L2, maskSize=5) ->
         maskSize (int, optional): Mask size, 0 or 3 or 5. Defaults to 5.
 
     Returns:
-        _type_: Normalized (0.0 ~ 1.0) SDF image
+        np.ndarray: Normalized (0.0 ~ 1.0) SDF image
     """
     
     dist_inside = cv2.distanceTransform(img_binary, distanceType, maskSize)
@@ -114,7 +124,10 @@ def generate_shadow_threshold_map(
         bit_depth:Literal[8, 16]=8, 
         color_mode:Literal['gray', 'rgb', 'rgba']='gray',
         reverse:bool=False, 
-        save_temp:bool=False
+        save_temp:bool=False,
+        filter_mode:Literal['none', 'gaussian', 'bilateral']='none',
+        gaussian_kernel:int=3,
+        bilateral_d:int=3
     ) -> None:
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -123,13 +136,19 @@ def generate_shadow_threshold_map(
         temp_dir = os.path.join(os.path.dirname(output_path), 'temp')
         os.makedirs(temp_dir, exist_ok=True)
 
+    # load images with grayscale
+    grayscale_images = []
+    for path in image_paths:
+        image = load_image_with_grayscale(path, binarization=True)
+        if image is not None:
+            grayscale_images.append(image)
+    image_count = len(grayscale_images)
+    logging.info("{} images loaded.".format(image_count))
+
     # step values
-    gradient_count = len(image_paths) - 1
+    gradient_count = image_count - 1
     interval = 1.0 / gradient_count
     step_values = [(interval * i, interval * (i + 1)) for i in range(gradient_count)]
-    
-    # load images with grayscale
-    grayscale_images = [load_image_with_grayscale(path, binarization=True) for path in image_paths]
 
     # generate sdf
     sdf_images = [generate_sdf(img) for img in grayscale_images]
@@ -151,7 +170,7 @@ def generate_shadow_threshold_map(
             s = 1 - s
             e = 1 - e
         
-        logging.info('Processing images: {}, {} (step: {:.5f} - {:.5f})'.format(image_paths[i], image_paths[i+1], s, e))
+        logging.info('Processing images: {}, {} (step: {:.5f} - {:.5f})'.format(os.path.basename(image_paths[i]), os.path.basename(image_paths[i+1]), s, e))
 
         # generate mask
         mask = get_image_difference(img1, img2)
@@ -176,6 +195,12 @@ def generate_shadow_threshold_map(
 
     # result
     shadow_threshold_map = np.sum(gradient_maps, axis=0)
+
+    # filter
+    if filter_mode == 'gaussian':
+        shadow_threshold_map = cv2.GaussianBlur(shadow_threshold_map, (gaussian_kernel, gaussian_kernel), 0)
+    elif filter_mode == 'bilateral':
+        shadow_threshold_map = cv2.bilateralFilter(shadow_threshold_map.astype(np.float32), bilateral_d, 75, 75)
     
     merged_mask = None
     if color_mode == 'rgba':
