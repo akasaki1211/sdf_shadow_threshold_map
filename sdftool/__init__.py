@@ -76,6 +76,8 @@ def save_image(
     # save
     cv2.imwrite(output_path, img)
 
+    logging.info("Saved to '{}'".format(output_path))
+
 def img_lerp(start:float, end:float, factor:np.ndarray) -> np.ndarray:
     return start + (end - start) * factor
 
@@ -92,7 +94,7 @@ def generate_sdf(img_binary:np.ndarray, distanceType=cv2.DIST_L2, maskSize=5) ->
         maskSize (int, optional): Mask size, 0 or 3 or 5. Defaults to 5.
 
     Returns:
-        _type_: Normalized (0.0 ~ 1.0) SDF image
+        np.ndarray: Normalized (0.0 ~ 1.0) SDF image
     """
     
     dist_inside = cv2.distanceTransform(img_binary, distanceType, maskSize)
@@ -168,7 +170,7 @@ def generate_shadow_threshold_map(
             s = 1 - s
             e = 1 - e
         
-        logging.info('Processing images: {}, {} (step: {:.5f} - {:.5f})'.format(image_paths[i], image_paths[i+1], s, e))
+        logging.info('Processing images: {}, {} (step: {:.5f} - {:.5f})'.format(os.path.basename(image_paths[i]), os.path.basename(image_paths[i+1]), s, e))
 
         # generate mask
         mask = get_image_difference(img1, img2)
