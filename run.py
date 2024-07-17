@@ -5,6 +5,7 @@ import sdftool
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Create a Shadow Threshold Map by interpolating SDF (Signed Distance Field).")
+    parser.add_argument('-v', '--version', action='version', version=sdftool.VERSION)
     parser.add_argument("-i", "--inputdir", type=str, required=True, help="Specify the input directory path where contains only images. This is a required option.")
     parser.add_argument("-o", "--outputdir", type=str, default='output', help="Specify the output directory path where images will be saved. Default is 'output'.")
     parser.add_argument("-n", "--outputname", type=str, default='shadow_threshold_map', help="Specify the base name for the output PNG file. Default is 'shadow_threshold_map'.")

@@ -4,6 +4,8 @@ import numpy as np
 import cv2
 import logging
 
+VERSION = '0.3.0'
+
 logging.basicConfig(
     level=logging.DEBUG, 
     format='[%(levelname)s] %(asctime)s | %(message)s'
@@ -20,10 +22,16 @@ def load_image_with_grayscale(image_path:str, binarization:bool=False) -> np.nda
     """
 
     img = cv2.imread(image_path)
+    if img is None:
+        logging.warning("Image '{}' could not be loaded.".format(image_path))
+        return
+    
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
     
     if binarization:
         _, gray = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY) 
+
+    logging.info("Image '{}' is loaded.".format(image_path))
     
     return gray
 
@@ -126,13 +134,19 @@ def generate_shadow_threshold_map(
         temp_dir = os.path.join(os.path.dirname(output_path), 'temp')
         os.makedirs(temp_dir, exist_ok=True)
 
+    # load images with grayscale
+    grayscale_images = []
+    for path in image_paths:
+        image = load_image_with_grayscale(path, binarization=True)
+        if image is not None:
+            grayscale_images.append(image)
+    image_count = len(grayscale_images)
+    logging.info("{} images loaded.".format(image_count))
+
     # step values
-    gradient_count = len(image_paths) - 1
+    gradient_count = image_count - 1
     interval = 1.0 / gradient_count
     step_values = [(interval * i, interval * (i + 1)) for i in range(gradient_count)]
-    
-    # load images with grayscale
-    grayscale_images = [load_image_with_grayscale(path, binarization=True) for path in image_paths]
 
     # generate sdf
     sdf_images = [generate_sdf(img) for img in grayscale_images]
