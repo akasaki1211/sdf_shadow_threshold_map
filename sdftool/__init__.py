@@ -4,7 +4,7 @@ import numpy as np
 import cv2
 import logging
 
-VERSION = '0.3.0'
+VERSION = '0.3.1'
 
 logging.basicConfig(
     level=logging.DEBUG, 
@@ -135,6 +135,8 @@ def generate_shadow_threshold_map(
     if save_temp:
         temp_dir = os.path.join(os.path.dirname(output_path), 'temp')
         os.makedirs(temp_dir, exist_ok=True)
+
+    image_paths.sort()
 
     # load images with grayscale
     grayscale_images = []

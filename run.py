@@ -20,7 +20,7 @@ def parse_arguments():
 
 def get_file_list(directory):
     filelist = []
-    for f in os.listdir(directory):
+    for f in sorted(os.listdir(directory)):
         path = os.path.join(directory, f)
         if os.path.isfile(path):
             filelist.append(path)
