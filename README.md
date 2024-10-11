@@ -1,4 +1,6 @@
-Create a **Shadow Threshold Map** by interpolating SDF (Signed Distance Field).
+[日本語README](README_jp.md)  
+
+Create a **Shadow Threshold Map** by interpolating SDF (Signed Distance Field).  
 
 ![top.png](.images/top.png)
 
@@ -87,6 +89,31 @@ ShadowThresholdMap.exe -i 'sample/sample1'
 
 ```powershell
 ShadowThresholdMap.exe -i 'sample/sample2' -o 'output2' -n 'face_map' -b 16 -c "rgb" -r -t
+```
+
+### bat
+
+The [`gen.bat`](bat/gen.bat) in the [`bat`](bat) folder makes the above command easier to use.  
+Place `ShadowThresholdMap.exe` downloaded from [Releases](https://github.com/akasaki1211/sdf_shadow_threshold_map/releases) in the `bat` folder, and drag and drop the folder containing the source images onto `gen.bat`.
+
+![use_bat](.images/use_bat.png)
+
+`gen.bat` contains the minimum command arguments. Please change the options as appropriate.
+
+```batchfile
+@echo off
+
+if "%~1"=="" exit
+
+:: show version
+echo Using version:
+%~dp0ShadowThresholdMap.exe -v
+
+:: run
+%~dp0ShadowThresholdMap.exe -i %~1
+
+::(example) add options
+::%~dp0ShadowThresholdMap.exe -i %~1 -b 16 -r -n "face_shadow_map" -c "rgba" -f "gaussian" -k 3
 ```
 
 ## Reference Links
