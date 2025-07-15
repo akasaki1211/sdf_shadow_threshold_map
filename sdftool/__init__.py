@@ -4,7 +4,7 @@ import numpy as np
 import cv2
 import logging
 
-VERSION = '0.3.1'
+VERSION = '0.3.2'
 
 logging.basicConfig(
     level=logging.DEBUG, 
@@ -40,7 +40,8 @@ def save_image(
         output_path:str, 
         bit_depth:Literal[8, 16]=8, 
         color_mode:Literal['gray', 'rgb', 'rgba']='gray',
-        alpha_normalized:Optional[np.ndarray]=None
+        alpha_normalized:Optional[np.ndarray]=None,
+        confirm_overwrite: bool = False
     ) -> None:
 
     """
@@ -74,8 +75,13 @@ def save_image(
         img = cv2.merge([img_dtype_conversion, img_dtype_conversion, img_dtype_conversion, alpha_dtype_conversion])
 
     # save
-    cv2.imwrite(output_path, img)
+    if confirm_overwrite and os.path.exists(output_path):
+        response = input(f"File '{output_path}' already exists. Overwrite? [y/n]: ").strip().lower()
+        if response not in ('y', 'yes'):
+            logging.info(f"Skipped saving to '{output_path}' (overwrite not confirmed).")
+            return
 
+    cv2.imwrite(output_path, img)
     logging.info("Saved to '{}'".format(output_path))
 
 def img_lerp(start:float, end:float, factor:np.ndarray) -> np.ndarray:
@@ -86,12 +92,12 @@ def get_image_difference(img1:np.ndarray, img2:np.ndarray) -> np.ndarray:
     img2_norm = cv2.normalize(img2, None, 0, 1.0, cv2.NORM_MINMAX)
     return np.abs(img2_norm.astype(np.float64) - img1_norm.astype(np.float64))
 
-def generate_sdf(img_binary:np.ndarray, distanceType=cv2.DIST_L2, maskSize=5) -> np.ndarray:
+def generate_sdf(img_binary:np.ndarray, distanceType=cv2.DIST_L2, maskSize=cv2.DIST_MASK_PRECISE) -> np.ndarray:
     """
     Args:
         img_binary (np.ndarray): 8-bit grayscale image binarized (0 or 255)
-        distanceType (_type_, optional): Distance type. Defaults to cv2.DIST_L2.
-        maskSize (int, optional): Mask size, 0 or 3 or 5. Defaults to 5.
+        distanceType (int, optional): Distance type. Defaults to cv2.DIST_L2.
+        maskSize (int, optional): Mask size, 0 or 3 or 5. Defaults to cv2.DIST_MASK_PRECISE (=0).
 
     Returns:
         np.ndarray: Normalized (0.0 ~ 1.0) SDF image
@@ -214,5 +220,6 @@ def generate_shadow_threshold_map(
         output_path, 
         bit_depth=bit_depth, 
         color_mode=color_mode, 
-        alpha_normalized=merged_mask
+        alpha_normalized=merged_mask,
+        confirm_overwrite=True
     )
