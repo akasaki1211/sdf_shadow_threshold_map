@@ -40,7 +40,8 @@ def save_image(
         output_path:str, 
         bit_depth:Literal[8, 16]=8, 
         color_mode:Literal['gray', 'rgb', 'rgba']='gray',
-        alpha_normalized:Optional[np.ndarray]=None
+        alpha_normalized:Optional[np.ndarray]=None,
+        confirm_overwrite: bool = False
     ) -> None:
 
     """
@@ -74,8 +75,13 @@ def save_image(
         img = cv2.merge([img_dtype_conversion, img_dtype_conversion, img_dtype_conversion, alpha_dtype_conversion])
 
     # save
-    cv2.imwrite(output_path, img)
+    if confirm_overwrite and os.path.exists(output_path):
+        response = input(f"File '{output_path}' already exists. Overwrite? [y/n]: ").strip().lower()
+        if response not in ('y', 'yes'):
+            logging.info(f"Skipped saving to '{output_path}' (overwrite not confirmed).")
+            return
 
+    cv2.imwrite(output_path, img)
     logging.info("Saved to '{}'".format(output_path))
 
 def img_lerp(start:float, end:float, factor:np.ndarray) -> np.ndarray:
@@ -214,5 +220,6 @@ def generate_shadow_threshold_map(
         output_path, 
         bit_depth=bit_depth, 
         color_mode=color_mode, 
-        alpha_normalized=merged_mask
+        alpha_normalized=merged_mask,
+        confirm_overwrite=True
     )
