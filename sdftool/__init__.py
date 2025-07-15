@@ -4,7 +4,7 @@ import numpy as np
 import cv2
 import logging
 
-VERSION = '0.3.1'
+VERSION = '0.3.2'
 
 logging.basicConfig(
     level=logging.DEBUG, 
@@ -86,12 +86,12 @@ def get_image_difference(img1:np.ndarray, img2:np.ndarray) -> np.ndarray:
     img2_norm = cv2.normalize(img2, None, 0, 1.0, cv2.NORM_MINMAX)
     return np.abs(img2_norm.astype(np.float64) - img1_norm.astype(np.float64))
 
-def generate_sdf(img_binary:np.ndarray, distanceType=cv2.DIST_L2, maskSize=5) -> np.ndarray:
+def generate_sdf(img_binary:np.ndarray, distanceType=cv2.DIST_L2, maskSize=cv2.DIST_MASK_PRECISE) -> np.ndarray:
     """
     Args:
         img_binary (np.ndarray): 8-bit grayscale image binarized (0 or 255)
-        distanceType (_type_, optional): Distance type. Defaults to cv2.DIST_L2.
-        maskSize (int, optional): Mask size, 0 or 3 or 5. Defaults to 5.
+        distanceType (int, optional): Distance type. Defaults to cv2.DIST_L2.
+        maskSize (int, optional): Mask size, 0 or 3 or 5. Defaults to cv2.DIST_MASK_PRECISE (=0).
 
     Returns:
         np.ndarray: Normalized (0.0 ~ 1.0) SDF image
